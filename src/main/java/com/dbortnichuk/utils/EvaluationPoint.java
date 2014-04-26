@@ -12,7 +12,7 @@ public class EvaluationPoint {
     private long pointMemory;
 
     public EvaluationPoint(int index, String name) {
-        this.name = Constants.LITERAL_POINT + index + Constants.LITERAL_SPACE + name;
+        this.name = Constants.STRING_POINT + index + Constants.STRING_SPACE + name;
         this.index = index;
     }
 

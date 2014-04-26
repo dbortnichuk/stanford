@@ -12,21 +12,48 @@ import java.util.List;
  */
 public class PerformanceEvaluator {
 
-    private String precision = Constants.LITERAL_MICRO;
+    private PerformanceEvaluator core;
+
+    private String name;
+
     private List<EvaluationPoint> points;
     private Runtime runtime;
+
+    private String timePrecision = Constants.STRING_MICRO;
+    private String memoryPrecision = Constants.STRING_NOMINAL;
+    private boolean displayTime = true;
+    private boolean displayMemory = false;
+
+    private PerformanceEvaluator(String name) {
+        this.name = name;
+    }
+
+    public static PerformanceEvaluator newInstance(String instanceName) {
+        PerformanceEvaluator instance = new PerformanceEvaluator(instanceName);
+        return instance;
+    }
+
+    public static PerformanceEvaluator newInstance() {
+        return newInstance(Constants.STRING_EMPTY);
+    }
 
     private void init() {
         points = new ArrayList<EvaluationPoint>();
         runtime = Runtime.getRuntime();
     }
 
+    private void finalise() {
+        points = null;
+        runtime = null;
+    }
 
     private void print(EvaluationPoint point) {
         if (point.getIndex() == 0) {
+            long currentPointMemory = point.getPointMemory();
+
             System.out.println(point.getName());
-            System.out.println(Constants.MESSAGE_FREE_MEMORY + runtime.freeMemory() + Constants.LITERAL_BYTES);
-            System.out.println(Constants.LITERAL_EMPTY_STRING);
+            System.out.println(Constants.MESSAGE_FREE_MEMORY + currentPointMemory + memoryPrecision + Constants.STRING_BYTES);
+            System.out.println(Constants.STRING_EMPTY);
         } else {
             long currentPointTime = point.getPointTime();
             long previousPointTime = points.get(point.getIndex() - 1).getPointTime();
@@ -38,44 +65,60 @@ public class PerformanceEvaluator {
 
             System.out.println(point.getName());
 
-            System.out.println(Constants.MESSAGE_INTERMEDIATE_OPERATION_TIME + (currentPointTime - previousPointTime) + precision + Constants.LITERAL_SECONDS);
-            System.out.println(Constants.MESSAGE_TOTAL_OPERATION_TIME + (currentPointTime - startPointTime) + precision + Constants.LITERAL_SECONDS);
+            if (displayTime) {
+                System.out.println(Constants.MESSAGE_INTERMEDIATE_OPERATION_TIME + (currentPointTime - previousPointTime) + timePrecision + Constants.STRING_SECONDS);
+                System.out.println(Constants.MESSAGE_TOTAL_OPERATION_TIME + (currentPointTime - startPointTime) + timePrecision + Constants.STRING_SECONDS);
+            }
 
-            System.out.println(Constants.MESSAGE_INTERMEDIATE_OPERATION_MEMORY + (previousPointMemory - currentPointMemory) + Constants.LITERAL_BYTES);
-            System.out.println(Constants.MESSAGE_TOTAL_OPERATION_MEMORY + (startPointMemory - currentPointMemory) + Constants.LITERAL_BYTES);
-            System.out.println(Constants.MESSAGE_FREE_MEMORY + runtime.freeMemory() + Constants.LITERAL_BYTES);
+            if (displayMemory) {
+                System.out.println(Constants.MESSAGE_INTERMEDIATE_OPERATION_MEMORY + (previousPointMemory - currentPointMemory) + memoryPrecision + Constants.STRING_BYTES);
+                System.out.println(Constants.MESSAGE_TOTAL_OPERATION_MEMORY + (startPointMemory - currentPointMemory) + memoryPrecision + Constants.STRING_BYTES);
+                System.out.println(Constants.MESSAGE_FREE_MEMORY + currentPointMemory + memoryPrecision + Constants.STRING_BYTES);
+            }
 
-
-            System.out.println(Constants.LITERAL_EMPTY_STRING);
+            System.out.println(Constants.STRING_EMPTY);
         }
     }
 
     private EvaluationPoint establishPoint(String name) throws PerformanceEvaluatorException {
         EvaluationPoint point = null;
-        if (points != null) {
+        if (points != null && runtime != null) {
             point = new EvaluationPoint(points.size(), name);
+
             long currentTime = 0;
-            if (precision.equals(Constants.LITERAL_MILI)) {
+            if (timePrecision.equals(Constants.STRING_NOMINAL)) {
+                currentTime = System.nanoTime() / (Constants.KILO * Constants.KILO * Constants.KILO);
+            } else if (timePrecision.equals(Constants.STRING_MILI)) {
                 currentTime = System.nanoTime() / (Constants.KILO * Constants.KILO);
-            } else if (precision.equals(Constants.LITERAL_MICRO)) {
+            } else if (timePrecision.equals(Constants.STRING_MICRO)) {
                 currentTime = System.nanoTime() / Constants.KILO;
-            } else if (precision.equals(Constants.LITERAL_NANO)) {
+            } else if (timePrecision.equals(Constants.STRING_NANO)) {
                 currentTime = System.nanoTime();
-            } else {
-                throw new PerformanceEvaluatorException(Constants.LITERAL_PERFORMANCE_EVALUATOR + Constants.MESSAGE_PRECISION_NOT_SUPPORTED + precision);
             }
             point.setPointTime(currentTime);
-            point.setPointMemory(runtime.freeMemory());
+
+            long currentMemory = 0;
+            if (memoryPrecision.equals(Constants.STRING_NOMINAL)) {
+                currentMemory = runtime.freeMemory();
+            } else if (memoryPrecision.equals(Constants.STRING_KILO)) {
+                currentMemory = runtime.freeMemory() / Constants.KILO;
+            } else if (memoryPrecision.equals(Constants.STRING_MEGA)) {
+                currentMemory = runtime.freeMemory() / (Constants.KILO * Constants.KILO);
+            } else if (memoryPrecision.equals(Constants.STRING_GIGA)) {
+                currentMemory = runtime.freeMemory() / (Constants.KILO * Constants.KILO * Constants.KILO);
+            }
+            point.setPointMemory(currentMemory);
+
             points.add(point);
         } else {
-            throw new PerformanceEvaluatorException(Constants.LITERAL_PERFORMANCE_EVALUATOR + Constants.MESSAGE_NOT_INITIALIZED);
+            throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR + Constants.MESSAGE_NOT_INITIALIZED);
         }
         return point;
     }
 
     public void start() throws PerformanceEvaluatorException {
         init();
-        EvaluationPoint startPoint = establishPoint(Constants.LITERAL_START);
+        EvaluationPoint startPoint = establishPoint(Constants.STRING_START);
         print(startPoint);
     }
 
@@ -89,23 +132,54 @@ public class PerformanceEvaluator {
     }
 
     public void point() throws PerformanceEvaluatorException {
-        point(Constants.LITERAL_EMPTY_STRING);
+        point(Constants.STRING_EMPTY);
     }
 
     public void stop() throws PerformanceEvaluatorException {
         if (points == null || points.size() < 1) {
-            throw new PerformanceEvaluatorException(Constants.LITERAL_PERFORMANCE_EVALUATOR + Constants.MESSAGE_NOT_STARTED);
+            throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR + Constants.MESSAGE_NOT_STARTED);
         } else {
-            EvaluationPoint stopPoint = establishPoint(Constants.LITERAL_STOP);
+            EvaluationPoint stopPoint = establishPoint(Constants.STRING_STOP);
             print(stopPoint);
+            finalise();
         }
     }
 
-    public String getPrecision() {
-        return precision;
+    public void configure(boolean printTime, String timePrecisionCode, boolean printMemory, String memoryPrecisionCode) throws PerformanceEvaluatorException {
+        timePrecision = validateTimePrecision(timePrecisionCode);
+        memoryPrecision = validateMemoryPrecision(memoryPrecisionCode);
+        displayTime = printTime;
+        displayMemory = printMemory;
     }
 
-    public void setPrecision(String precision) {
-        this.precision = precision;
+    private String validateTimePrecision(String timePrecisionCode) throws PerformanceEvaluatorException {
+        if (timePrecisionCode != null && !timePrecisionCode.isEmpty()) {
+            if (timePrecisionCode.equals(Constants.STRING_NOMINAL) || timePrecisionCode.equals(Constants.STRING_MILI) || timePrecisionCode.equals(Constants.STRING_MICRO)
+                    || timePrecisionCode.equals(Constants.STRING_NANO)) {
+                return timePrecisionCode;
+            } else {
+                throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR
+                        + Constants.STRING_TIME + Constants.MESSAGE_PRECISION_NOT_SUPPORTED + timePrecisionCode);
+            }
+        } else {
+            throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR
+                    + Constants.STRING_TIME + Constants.MESSAGE_PRECISION_NOT_PROVIDED);
+        }
     }
+
+    private String validateMemoryPrecision(String memoryPrecisionCode) throws PerformanceEvaluatorException {
+        if (memoryPrecisionCode != null && !memoryPrecisionCode.isEmpty()) {
+            if (memoryPrecisionCode.equals(Constants.STRING_NOMINAL) || memoryPrecisionCode.equals(Constants.STRING_KILO)
+                    || memoryPrecisionCode.equals(Constants.STRING_MEGA) || memoryPrecisionCode.equals(Constants.STRING_GIGA)) {
+                return memoryPrecisionCode;
+            } else {
+                throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR
+                        + Constants.STRING_MEMORY + Constants.MESSAGE_PRECISION_NOT_SUPPORTED + memoryPrecisionCode);
+            }
+        } else {
+            throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR
+                    + Constants.STRING_MEMORY + Constants.MESSAGE_PRECISION_NOT_PROVIDED);
+        }
+    }
+
 }

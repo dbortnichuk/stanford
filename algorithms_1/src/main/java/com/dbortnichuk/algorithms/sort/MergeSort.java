@@ -4,6 +4,10 @@ import com.dbortnichuk.exception.PerformanceEvaluatorException;
 import com.dbortnichuk.utils.Constants;
 import com.dbortnichuk.utils.PerformanceEvaluator;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 /**
  * User: dbortnichuk
  * Date: 4/23/14
@@ -22,12 +26,13 @@ public class MergeSort {
         }
     }
 
-    public static void main(String[] args) throws PerformanceEvaluatorException, InterruptedException {
-        PerformanceEvaluator evaluator = new PerformanceEvaluator();
-        evaluator.point();
+    public static void main(String[] args) throws PerformanceEvaluatorException, InterruptedException, FileNotFoundException {
+        PerformanceEvaluator evaluator = PerformanceEvaluator.newInstance();
 
+
+        evaluator.point();
         for (int i = 0; i < Constants.KILO * Constants.KILO; i++){
-             new PerformanceEvaluator();
+            PerformanceEvaluator evaluator1 = PerformanceEvaluator.newInstance();
              if(i == 200000 ){
                  evaluator.point("index: " + i);
              } else if(i == 500000){
