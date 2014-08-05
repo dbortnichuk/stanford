@@ -1,5 +1,7 @@
 package com.dbortnichuk.utils;
 
+import com.dbortnichuk.utils.Constants;
+
 /**
  * User: dbortnichuk
  * Date: 4/23/14

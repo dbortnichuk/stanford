@@ -116,33 +116,38 @@ public class PerformanceEvaluator {
         return point;
     }
 
-    public void start() throws PerformanceEvaluatorException {
+    public EvaluationPoint start() throws PerformanceEvaluatorException {
         init();
         EvaluationPoint startPoint = establishPoint(Constants.STRING_START);
         print(startPoint);
+        return startPoint;
     }
 
-    public void point(String name) throws PerformanceEvaluatorException {
+    public EvaluationPoint point(String name) throws PerformanceEvaluatorException {
+        EvaluationPoint point = null;
         if (points == null || points.size() == 0) {
             start();
         } else {
-            EvaluationPoint startPoint = establishPoint(name);
-            print(startPoint);
+            point = establishPoint(name);
+            print(point);
         }
+        return point;
     }
 
     public void point() throws PerformanceEvaluatorException {
         point(Constants.STRING_EMPTY);
     }
 
-    public void stop() throws PerformanceEvaluatorException {
+    public EvaluationPoint stop() throws PerformanceEvaluatorException {
+        EvaluationPoint stopPoint = null;
         if (points == null || points.size() < 1) {
             throw new PerformanceEvaluatorException(Constants.STRING_PERFORMANCE_EVALUATOR + Constants.MESSAGE_NOT_STARTED);
         } else {
-            EvaluationPoint stopPoint = establishPoint(Constants.STRING_STOP);
+            stopPoint = establishPoint(Constants.STRING_STOP);
             print(stopPoint);
             finalise();
         }
+        return stopPoint;
     }
 
     public void configure(boolean printTime, String timePrecisionCode, boolean printMemory, String memoryPrecisionCode) throws PerformanceEvaluatorException {
