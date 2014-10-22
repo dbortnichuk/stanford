@@ -116,7 +116,7 @@ public class QuickSort {
             return inputArray;
         }
 
-        int currentPivotIndex = partitionUsingLastNew(inputArray, start, end);
+        int currentPivotIndex = partitionUsingMedian(inputArray, start, end);
         if (start < currentPivotIndex) {
             sort(inputArray, start, currentPivotIndex - 1);
         }
@@ -140,7 +140,7 @@ public class QuickSort {
         if (localMedian == localStart) {
             return partitionUsingFirst(inputArray, start, end);
         } else if (localMedian == localEnd) {
-            return partitionUsingLast(inputArray, start, end);
+            return partitionUsingLastNew(inputArray, start, end);
         } else {
             return partitionUsingMiddle(inputArray, start, end);
         }
@@ -178,6 +178,9 @@ public class QuickSort {
         }
     }
 
+    /*
+     This method is not switching last element with first to bu used as a pivot and as a result is using a bit different partition subroutine
+     */
     private int partitionUsingLast(Integer[] inputArray, int start, int end) {
         if (end - start < 1) {
             return start;
@@ -194,7 +197,6 @@ public class QuickSort {
                 i++;
 
             }
-            comparisonsOneByOne++;
         }
 
         tmp = inputArray[end];
