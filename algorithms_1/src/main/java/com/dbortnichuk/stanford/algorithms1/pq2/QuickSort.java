@@ -89,7 +89,7 @@ public class QuickSort {
     public static void main(String[] args) throws PerformanceEvaluatorException {
         PerformanceEvaluator performanceEvaluator = PerformanceEvaluator.newInstance();
 
-        QuickSort quickSort = new QuickSort("/pq2q1.txt");
+        QuickSort quickSort = new QuickSort("/pq2q1q2q3.txt");
         Integer[] inputData = quickSort.getDataAsArray();
 
         performanceEvaluator.start();
