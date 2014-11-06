@@ -78,7 +78,7 @@ public class RandomizedContraction {
     public static void main(String[] args) throws PerformanceEvaluatorException {
         PerformanceEvaluator performanceEvaluator = PerformanceEvaluator.newInstance();
 
-        RandomizedContraction randomizedContraction = new RandomizedContraction("/testInput.txt");
+        RandomizedContraction randomizedContraction = new RandomizedContraction("/pq3_kargerMinCut.txt");
         Map<Integer, List<Integer>> inputData = randomizedContraction.getGraph();
 
         performanceEvaluator.start();
@@ -97,6 +97,7 @@ public class RandomizedContraction {
             List<Integer> cuts = new ArrayList<Integer>();
 
             for (int i = 1; i <= contractionTries; i++) {
+                System.out.println("Contraction try: " + i);
                 Map<Integer, List<Integer>> graphToProcess = getInputCopy(graph);
                 int cut = contract(graphToProcess);
                 cuts.add(cut);
@@ -145,7 +146,7 @@ public class RandomizedContraction {
 
         edge.add(edgeStart);
         edge.add(edgeEnd);
-
+        System.out.println("Current edge: " + edge);
         return edge;
     }
 
@@ -164,7 +165,7 @@ public class RandomizedContraction {
         //for 2’s adjacent nodes, scan their lists and replace all occurrence of 2 as 1
         for (Integer endVertexRelation : endVertexRelations) {
             List<Integer> endVertexRelationRelations = graph.get(endVertexRelation);
-            for (int i = 0; i < endVertexRelationRelations.size() - 1; i++) {
+            for (int i = 0; i <= endVertexRelationRelations.size() - 1; i++) {
                 Integer endVertexRelationRelation = endVertexRelationRelations.get(i);
                 if (endVertexRelationRelation.equals(endVertex)) {
                     endVertexRelationRelations.set(i, startVertex);
