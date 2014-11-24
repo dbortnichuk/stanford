@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
  */
 public class Kosaraju {
 
-    public final String fileName = "/SCC.txt";
+    public final String fileName = "/pq4_SCC.txt";
     public final int N = 875714;
     public ArrayList<Integer>[] g = new ArrayList[N];
     public ArrayList<Integer>[] gRev = new ArrayList[N];
